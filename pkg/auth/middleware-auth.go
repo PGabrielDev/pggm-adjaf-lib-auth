@@ -3,7 +3,9 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 	"strings"
+	"time"
 )
 
 func CheckPermissions(next http.HandlerFunc) http.HandlerFunc {
@@ -13,11 +15,24 @@ func CheckPermissions(next http.HandlerFunc) http.HandlerFunc {
 		if token == "" {
 			w.WriteHeader(http.StatusUnauthorized)
 			GenerateErrorResponse(w, "Não authorizado", "Token é necessario", http.StatusUnauthorized)
+			return
 		}
 		token = strings.Split(token, " ")[1]
 		if token == "" {
 			w.WriteHeader(http.StatusUnauthorized)
 			GenerateErrorResponse(w, "Não authorizado", "Token não é valido", http.StatusUnauthorized)
+			return
+		}
+		client := &http.Client{}
+		urlAuth := os.Getenv("URL_AUTH")
+		request, err := http.NewRequest(http.MethodGet, urlAuth, nil)
+		request.Header.Set("Authorization", "Bearer "+token)
+		client.Timeout = time.Second * 10
+		response, err := client.Do(request)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			GenerateErrorResponse(w, "Auth Error", err.Error(), http.StatusForbidden0)
+			return
 		}
 
 		next(w, r)
