@@ -2,13 +2,15 @@ package auth
 
 import (
 	"encoding/json"
+	"github.com/PGabrielDev/pggm--adjaf-lib-auth/pkg/auth/DTOs"
+	"io"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 )
 
-func CheckPermissions(next http.HandlerFunc) http.HandlerFunc {
+func CheckPermissions(next http.HandlerFunc, ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		token := r.Header.Get("Authorization")
@@ -31,10 +33,25 @@ func CheckPermissions(next http.HandlerFunc) http.HandlerFunc {
 		response, err := client.Do(request)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
-			GenerateErrorResponse(w, "Auth Error", err.Error(), http.StatusForbidden0)
+			GenerateErrorResponse(w, "Auth Error", err.Error(), http.StatusForbidden)
 			return
 		}
+		defer response.Body.Close()
+		responsePayload, err := io.ReadAll(response.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			GenerateErrorResponse(w, "Parser error", err.Error(), http.StatusInternalServerError)
+			return
+		}
+		var authDTO []DTOs.UserAccessDTO
+		if err := json.Unmarshal(responsePayload, &authDTO); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			GenerateErrorResponse(w, "Parser error", err.Error(), http.StatusInternalServerError)
+			return
+		}
+		for _, v := range authDTO {
 
+		}
 		next(w, r)
 	}
 }
