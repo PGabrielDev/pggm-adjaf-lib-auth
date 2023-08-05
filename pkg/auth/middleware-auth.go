@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func CheckPermissions(next http.HandlerFunc, ) http.HandlerFunc {
+func CheckPermissions(next http.HandlerFunc, dto DTOs.AuthPermission) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		token := r.Header.Get("Authorization")
@@ -50,9 +50,17 @@ func CheckPermissions(next http.HandlerFunc, ) http.HandlerFunc {
 			return
 		}
 		for _, v := range authDTO {
-
+			if dto.Name == v.ProductName {
+				for _, level := range v.LevelAccess {
+					if dto.Permission.String() == level.LevelAccessName {
+						next(w, r)
+					}
+				}
+			}
 		}
-		next(w, r)
+		w.WriteHeader(http.StatusUnauthorized)
+		GenerateErrorResponse(w, "Auth error", "Sem permissoes necessarias", http.StatusForbidden)
+		return
 	}
 }
 
@@ -66,4 +74,8 @@ func GenerateErrorResponse(w http.ResponseWriter, message, description string, s
 		Description: description,
 		Status:      statusCode,
 	})
+}
+
+func containLevelAccess(level string, listAccess []DTOs.LevelAccessDTO) {
+
 }
