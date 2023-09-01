@@ -58,7 +58,7 @@ func CheckPermissions(next http.HandlerFunc, dto DTOs.AuthPermission) http.Handl
 				}
 			}
 		}
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusForbidden)
 		GenerateErrorResponse(w, "Auth error", "Sem permissoes necessarias", http.StatusForbidden)
 		return
 	}
