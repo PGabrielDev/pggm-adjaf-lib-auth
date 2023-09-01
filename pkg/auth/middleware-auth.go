@@ -2,7 +2,7 @@ package auth
 
 import (
 	"encoding/json"
-	"github.com/PGabrielDev/pggm--adjaf-lib-auth/pkg/auth/DTOs"
+	"github.com/PGabrielDev/pggm-adjaf-lib-auth/pkg/auth/DTOs"
 	"io"
 	"net/http"
 	"os"
