@@ -54,6 +54,7 @@ func CheckPermissions(next http.HandlerFunc, dto DTOs.AuthPermission) http.Handl
 				for _, level := range v.LevelAccess {
 					if dto.Permission.String() == level.LevelAccessName {
 						next(w, r)
+						return
 					}
 				}
 			}
@@ -74,8 +75,4 @@ func GenerateErrorResponse(w http.ResponseWriter, message, description string, s
 		Description: description,
 		Status:      statusCode,
 	})
-}
-
-func containLevelAccess(level string, listAccess []DTOs.LevelAccessDTO) {
-
 }
